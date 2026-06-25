@@ -171,13 +171,13 @@ if df is not None:
                 st.metric(
                     "Meta",
                     f"R$ {kpis['investimento']['meta']:,.0f}",
-                    f"✅ {investimento_ating:.1f}% da meta (meta superada!)"
+                    f"{investimento_ating:.1f}% da meta (meta superada!)"
                 )
             else:
                 st.metric(
                     "Meta",
                     f"R$ {kpis['investimento']['meta']:,.0f}",
-                    f"📊 {investimento_ating:.1f}% da meta (faltam R$ {diferenca_invest:,.0f})"
+                    f"{investimento_ating:.1f}% da meta (faltam R$ {diferenca_invest:,.0f})"
                 )
     
     with col2:
@@ -196,13 +196,13 @@ if df is not None:
                 st.metric(
                     "Meta",
                     f"{kpis['leads']['meta']:,.0f}",
-                    f"✅ {leads_ating:.1f}% da meta (meta superada!)"
+                    f"{leads_ating:.1f}% da meta (meta superada!)"
                 )
             else:
                 st.metric(
                     "Meta",
                     f"{kpis['leads']['meta']:,.0f}",
-                    f"📊 {leads_ating:.1f}% da meta (faltam {diferenca_leads:,.0f})"
+                    f"{leads_ating:.1f}% da meta (faltam {diferenca_leads:,.0f})"
                 )
     
     col3, col4 = st.columns(2)
@@ -223,13 +223,13 @@ if df is not None:
                 st.metric(
                     "Meta",
                     f"{kpis['inscritos']['meta']:,.0f}",
-                    f"✅ {inscritos_ating:.1f}% da meta (meta superada!)"
+                    f"{inscritos_ating:.1f}% da meta (meta superada!)"
                 )
             else:
                 st.metric(
                     "Meta",
                     f"{kpis['inscritos']['meta']:,.0f}",
-                    f"📊 {inscritos_ating:.1f}% da meta (faltam {diferenca_inscritos:,.0f})"
+                    f"{inscritos_ating:.1f}% da meta (faltam {diferenca_inscritos:,.0f})"
                 )
     
     with col4:
@@ -248,13 +248,13 @@ if df is not None:
                 st.metric(
                     "Meta",
                     f"{kpis['matriculas']['meta']:,.0f}",
-                    f"✅ {matriculas_ating:.1f}% da meta (meta superada!)"
+                    f"{matriculas_ating:.1f}% da meta (meta superada!)"
                 )
             else:
                 st.metric(
                     "Meta",
                     f"{kpis['matriculas']['meta']:,.0f}",
-                    f"📊 {matriculas_ating:.1f}% da meta (faltam {diferenca_matriculas:,.0f})"
+                    f"{matriculas_ating:.1f}% da meta (faltam {diferenca_matriculas:,.0f})"
                 )
     
     st.markdown("---")
