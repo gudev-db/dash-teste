@@ -71,6 +71,24 @@ def calcular_atingimento(realizado, meta):
         return (realizado / meta) * 100
     return 0
 
+def formatar_metricas_kpi(df_filtrado):
+    """Formata métricas para exibição nos KPIs"""
+    total_investimento = df_filtrado['investimento'].sum()
+    total_meta_investimento = df_filtrado['meta_investimento'].sum()
+    total_leads = df_filtrado['leads'].sum()
+    total_meta_leads = df_filtrado['meta_leads'].sum()
+    total_inscritos = df_filtrado['inscritos'].sum()
+    total_meta_inscritos = df_filtrado['meta_inscritos'].sum()
+    total_matriculas = df_filtrado['matriculas'].sum()
+    total_meta_matriculas = df_filtrado['meta_matriculas'].sum()
+    
+    return {
+        'investimento': {'realizado': total_investimento, 'meta': total_meta_investimento},
+        'leads': {'realizado': total_leads, 'meta': total_meta_leads},
+        'inscritos': {'realizado': total_inscritos, 'meta': total_meta_inscritos},
+        'matriculas': {'realizado': total_matriculas, 'meta': total_meta_matriculas}
+    }
+
 # =====================
 # 3. INTERFACE DO DASHBOARD
 # =====================
@@ -81,24 +99,30 @@ df = carregar_dados()
 if df is not None:
     # Sidebar - Filtros
     st.sidebar.title("🎯 Filtros")
+    st.sidebar.markdown("---")
     
     # Período
     min_date = df['data'].min()
     max_date = df['data'].max()
     periodo = st.sidebar.date_input(
-        "Período",
+        "📅 Período",
         value=(min_date, max_date),
         min_value=min_date,
         max_value=max_date
     )
     
+    st.sidebar.markdown("---")
+    
     # Marca
     marcas = ['Todas'] + sorted(df['marca'].unique().tolist())
-    marca_selecionada = st.sidebar.selectbox("Marca", marcas)
+    marca_selecionada = st.sidebar.selectbox("🏢 Marca", marcas)
     
     # Modalidade
     modalidades = ['Todas'] + sorted(df['modalidade'].unique().tolist())
-    modalidade_selecionada = st.sidebar.selectbox("Modalidade", modalidades)
+    modalidade_selecionada = st.sidebar.selectbox("📚 Modalidade", modalidades)
+    
+    st.sidebar.markdown("---")
+    st.sidebar.info("💡 **Dica:** Use os filtros para analisar períodos específicos ou comparar marcas e modalidades.")
     
     # Aplicar filtros
     df_filtrado = df.copy()
@@ -115,6 +139,7 @@ if df is not None:
     
     # Título
     st.title("📈 Dashboard de Performance - Tráfego Pago")
+    st.markdown(f"*Período analisado: {periodo[0].strftime('%d/%m/%Y')} a {periodo[1].strftime('%d/%m/%Y')}*")
     st.markdown("---")
     
     # =====================
@@ -123,40 +148,43 @@ if df is not None:
     
     st.header("📊 Visão Geral - Realizado vs Meta")
     
-    # KPI Cards com meta real
+    # Calcular dados para KPIs
+    kpis = formatar_metricas_kpi(df_filtrado)
+    
+    # Layout em 2 colunas para cada métrica
     col1, col2 = st.columns(2)
     
     with col1:
         st.subheader("💰 Investimento")
-        investimento_ating = calcular_atingimento(metricas['investimento'], metricas['meta_investimento'])
+        investimento_ating = calcular_atingimento(kpis['investimento']['realizado'], kpis['investimento']['meta'])
         
         col1a, col1b = st.columns(2)
         with col1a:
             st.metric(
                 "Realizado",
-                f"R$ {metricas['investimento']:,.0f}"
+                f"R$ {kpis['investimento']['realizado']:,.0f}"
             )
         with col1b:
             st.metric(
                 "Meta",
-                f"R$ {metricas['meta_investimento']:,.0f}",
+                f"R$ {kpis['investimento']['meta']:,.0f}",
                 f"{investimento_ating:.1f}% atingido"
             )
     
     with col2:
         st.subheader("👥 Leads")
-        leads_ating = calcular_atingimento(metricas['leads'], metricas['meta_leads'])
+        leads_ating = calcular_atingimento(kpis['leads']['realizado'], kpis['leads']['meta'])
         
         col2a, col2b = st.columns(2)
         with col2a:
             st.metric(
                 "Realizado",
-                f"{metricas['leads']:,.0f}"
+                f"{kpis['leads']['realizado']:,.0f}"
             )
         with col2b:
             st.metric(
                 "Meta",
-                f"{metricas['meta_leads']:,.0f}",
+                f"{kpis['leads']['meta']:,.0f}",
                 f"{leads_ating:.1f}% atingido"
             )
     
@@ -164,42 +192,42 @@ if df is not None:
     
     with col3:
         st.subheader("📝 Inscritos")
-        inscritos_ating = calcular_atingimento(metricas['inscritos'], metricas['meta_inscritos'])
+        inscritos_ating = calcular_atingimento(kpis['inscritos']['realizado'], kpis['inscritos']['meta'])
         
         col3a, col3b = st.columns(2)
         with col3a:
             st.metric(
                 "Realizado",
-                f"{metricas['inscritos']:,.0f}"
+                f"{kpis['inscritos']['realizado']:,.0f}"
             )
         with col3b:
             st.metric(
                 "Meta",
-                f"{metricas['meta_inscritos']:,.0f}",
+                f"{kpis['inscritos']['meta']:,.0f}",
                 f"{inscritos_ating:.1f}% atingido"
             )
     
     with col4:
         st.subheader("🎓 Matrículas")
-        matriculas_ating = calcular_atingimento(metricas['matriculas'], metricas['meta_matriculas'])
+        matriculas_ating = calcular_atingimento(kpis['matriculas']['realizado'], kpis['matriculas']['meta'])
         
         col4a, col4b = st.columns(2)
         with col4a:
             st.metric(
                 "Realizado",
-                f"{metricas['matriculas']:,.0f}"
+                f"{kpis['matriculas']['realizado']:,.0f}"
             )
         with col4b:
             st.metric(
                 "Meta",
-                f"{metricas['meta_matriculas']:,.0f}",
+                f"{kpis['matriculas']['meta']:,.0f}",
                 f"{matriculas_ating:.1f}% atingido"
             )
     
     st.markdown("---")
     
     # Gráfico de evolução mensal com meta
-    st.subheader("Evolução Mensal vs Meta")
+    st.subheader("📈 Evolução Mensal vs Meta")
     
     df_mensal = df_filtrado.groupby('data').agg({
         'investimento': 'sum',
@@ -213,10 +241,12 @@ if df is not None:
     }).reset_index()
     
     # Selecionar métrica para visualização
-    metrica_evolucao = st.selectbox(
-        "Selecione a métrica para visualizar evolução:",
-        ['investimento', 'leads', 'inscritos', 'matriculas']
-    )
+    col_metric, col_empty = st.columns([1, 3])
+    with col_metric:
+        metrica_evolucao = st.selectbox(
+            "Selecione a métrica:",
+            ['investimento', 'leads', 'inscritos', 'matriculas']
+        )
     
     nome_metrica = {
         'investimento': 'Investimento (R$)',
@@ -250,8 +280,10 @@ if df is not None:
     )
     st.plotly_chart(fig, use_container_width=True)
     
+    st.markdown("---")
+    
     # Métricas por Marca com metas
-    st.subheader("Métricas por Marca - Realizado vs Meta")
+    st.subheader("🏢 Métricas por Marca - Realizado vs Meta")
     
     df_marca = df_filtrado.groupby('marca').agg({
         'investimento': 'sum',
@@ -270,34 +302,39 @@ if df is not None:
             cpi = row['investimento'] / row['inscritos'] if row['inscritos'] > 0 else 0
             cpmat = row['investimento'] / row['matriculas'] if row['matriculas'] > 0 else 0
             
-            # Cards com meta para cada marca
+            ating_invest = calcular_atingimento(row['investimento'], row['meta_investimento'])
+            ating_leads = calcular_atingimento(row['leads'], row['meta_leads'])
+            ating_inscritos = calcular_atingimento(row['inscritos'], row['meta_inscritos'])
+            ating_matriculas = calcular_atingimento(row['matriculas'], row['meta_matriculas'])
+            
             col1, col2 = st.columns(2)
             
             with col1:
                 st.metric(
                     "💰 Investimento",
                     f"R$ {row['investimento']:,.0f}",
-                    f"Meta: R$ {row['meta_investimento']:,.0f}"
+                    f"Meta: R$ {row['meta_investimento']:,.0f} ({ating_invest:.1f}%)"
                 )
                 st.metric(
                     "👥 Leads",
                     f"{row['leads']:,.0f}",
-                    f"Meta: {row['meta_leads']:,.0f}"
+                    f"Meta: {row['meta_leads']:,.0f} ({ating_leads:.1f}%)"
                 )
             
             with col2:
                 st.metric(
                     "📝 Inscritos",
                     f"{row['inscritos']:,.0f}",
-                    f"Meta: {row['meta_inscritos']:,.0f}"
+                    f"Meta: {row['meta_inscritos']:,.0f} ({ating_inscritos:.1f}%)"
                 )
                 st.metric(
                     "🎓 Matrículas",
                     f"{row['matriculas']:,.0f}",
-                    f"Meta: {row['meta_matriculas']:,.0f}"
+                    f"Meta: {row['meta_matriculas']:,.0f} ({ating_matriculas:.1f}%)"
                 )
             
             # Custos
+            st.write("**Custos:**")
             col3, col4, col5 = st.columns(3)
             col3.metric("CPL", f"R$ {cpl:.2f}")
             col4.metric("CPI", f"R$ {cpi:.2f}")
@@ -369,7 +406,7 @@ if df is not None:
             st.plotly_chart(fig_taxas, use_container_width=True)
     
     # Custos por Etapa
-    st.subheader("Custos por Etapa")
+    st.subheader("💰 Custos por Etapa")
     custos_df = pd.DataFrame({
         'Métrica': ['CPL', 'CPI', 'CPMat'],
         'Valor (R$)': [metricas['cpl'], metricas['cpi'], metricas['cpmat']]
@@ -420,27 +457,27 @@ if df is not None:
         x=df_comparativo['marca'],
         y=df_comparativo['leads'],
         name='Leads Realizado',
-        marker_color='green'
+        marker_color='#2ca02c'
     ))
     fig_comparativo.add_trace(go.Bar(
         x=df_comparativo['marca'],
         y=df_comparativo['meta_leads'],
         name='Meta Leads',
-        marker_color='lightgreen',
-        opacity=0.6
+        marker_color='#98df8a',
+        opacity=0.7
     ))
     fig_comparativo.add_trace(go.Bar(
         x=df_comparativo['marca'],
         y=df_comparativo['matriculas'],
         name='Matrículas Realizado',
-        marker_color='red'
+        marker_color='#d62728'
     ))
     fig_comparativo.add_trace(go.Bar(
         x=df_comparativo['marca'],
         y=df_comparativo['meta_matriculas'],
         name='Meta Matrículas',
-        marker_color='lightcoral',
-        opacity=0.6
+        marker_color='#ff9896',
+        opacity=0.7
     ))
     fig_comparativo.update_layout(
         title='Leads vs Matrículas - Realizado vs Meta',
@@ -450,6 +487,7 @@ if df is not None:
     st.plotly_chart(fig_comparativo, use_container_width=True)
     
     # Tabela comparativa completa
+    st.subheader("📊 Tabela Comparativa Detalhada")
     st.dataframe(
         df_comparativo.style.format({
             'investimento': 'R$ {:,.0f}',
@@ -496,7 +534,9 @@ if df is not None:
             y=top_leads.index,
             orientation='h',
             title='Top 10 Cidades por Leads',
-            text_auto=True
+            text_auto=True,
+            color=top_leads.values,
+            color_continuous_scale='Blues'
         )
         fig_leads_cidade.update_layout(height=400)
         st.plotly_chart(fig_leads_cidade, use_container_width=True)
@@ -509,10 +549,24 @@ if df is not None:
             y=top_matriculas.index,
             orientation='h',
             title='Top 10 Cidades por Matrículas',
-            text_auto=True
+            text_auto=True,
+            color=top_matriculas.values,
+            color_continuous_scale='Reds'
         )
         fig_matriculas_cidade.update_layout(height=400)
         st.plotly_chart(fig_matriculas_cidade, use_container_width=True)
+    
+    # Tabela por região
+    st.subheader("📊 Detalhamento por Cidade")
+    st.dataframe(
+        df_regiao.sort_values('leads', ascending=False).head(20).style.format({
+            'leads': '{:,.0f}',
+            'matriculas': '{:,.0f}',
+            'meta_leads': '{:,.0f}',
+            'meta_matriculas': '{:,.0f}'
+        }),
+        use_container_width=True
+    )
     
     st.markdown("---")
     
@@ -524,7 +578,9 @@ if df is not None:
     
     df_curso = df_filtrado.groupby(['curso', 'marca']).agg({
         'leads': 'sum',
-        'matriculas': 'sum'
+        'matriculas': 'sum',
+        'meta_leads': 'sum',
+        'meta_matriculas': 'sum'
     }).reset_index()
     
     col1, col2 = st.columns(2)
@@ -536,7 +592,9 @@ if df is not None:
             y=top_cursos_leads.index,
             orientation='h',
             title='Top 10 Cursos por Leads',
-            text_auto=True
+            text_auto=True,
+            color=top_cursos_leads.values,
+            color_continuous_scale='Greens'
         )
         fig_cursos_leads.update_layout(height=400)
         st.plotly_chart(fig_cursos_leads, use_container_width=True)
@@ -548,7 +606,9 @@ if df is not None:
             y=top_cursos_matriculas.index,
             orientation='h',
             title='Top 10 Cursos por Matrículas',
-            text_auto=True
+            text_auto=True,
+            color=top_cursos_matriculas.values,
+            color_continuous_scale='Oranges'
         )
         fig_cursos_matriculas.update_layout(height=400)
         st.plotly_chart(fig_cursos_matriculas, use_container_width=True)
@@ -580,6 +640,19 @@ if df is not None:
     fig_plataforma.update_layout(height=400)
     st.plotly_chart(fig_plataforma, use_container_width=True)
     
+    # Gráfico de matrículas por plataforma
+    fig_plataforma_mat = px.bar(
+        df_plataforma,
+        x='plataforma',
+        y='matriculas',
+        color='marca',
+        title='Matrículas por Plataforma',
+        barmode='group',
+        text_auto=True
+    )
+    fig_plataforma_mat.update_layout(height=400)
+    st.plotly_chart(fig_plataforma_mat, use_container_width=True)
+    
     # Métricas de plataforma
     df_plataforma_meta = df_plataforma[df_plataforma['plataforma'] == 'Meta']
     df_plataforma_google = df_plataforma[df_plataforma['plataforma'] == 'Google']
@@ -587,28 +660,28 @@ if df is not None:
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("Meta Ads")
+        st.subheader("📘 Meta Ads")
         if not df_plataforma_meta.empty:
-            st.dataframe(
-                df_plataforma_meta.style.format({
-                    'investimento': 'R$ {:,.0f}',
-                    'leads': '{:,.0f}',
-                    'matriculas': '{:,.0f}'
-                }),
-                use_container_width=True
-            )
+            for _, row in df_plataforma_meta.iterrows():
+                cpl = row['investimento'] / row['leads'] if row['leads'] > 0 else 0
+                cpmat = row['investimento'] / row['matriculas'] if row['matriculas'] > 0 else 0
+                st.write(f"**{row['marca']}**")
+                col_a, col_b, col_c = st.columns(3)
+                col_a.metric("Leads", f"{row['leads']:,.0f}")
+                col_b.metric("Matrículas", f"{row['matriculas']:,.0f}")
+                col_c.metric("CPL", f"R$ {cpl:.2f}")
     
     with col2:
-        st.subheader("Google Ads")
+        st.subheader("📗 Google Ads")
         if not df_plataforma_google.empty:
-            st.dataframe(
-                df_plataforma_google.style.format({
-                    'investimento': 'R$ {:,.0f}',
-                    'leads': '{:,.0f}',
-                    'matriculas': '{:,.0f}'
-                }),
-                use_container_width=True
-            )
+            for _, row in df_plataforma_google.iterrows():
+                cpl = row['investimento'] / row['leads'] if row['leads'] > 0 else 0
+                cpmat = row['investimento'] / row['matriculas'] if row['matriculas'] > 0 else 0
+                st.write(f"**{row['marca']}**")
+                col_a, col_b, col_c = st.columns(3)
+                col_a.metric("Leads", f"{row['leads']:,.0f}")
+                col_b.metric("Matrículas", f"{row['matriculas']:,.0f}")
+                col_c.metric("CPL", f"R$ {cpl:.2f}")
     
     st.markdown("---")
     
@@ -621,7 +694,7 @@ if df is not None:
     # Criativos do Meta
     df_meta = df_filtrado[df_filtrado['plataforma'] == 'Meta']
     if not df_meta.empty:
-        st.subheader("Performance de Criativos - Meta")
+        st.subheader("🎨 Performance de Criativos - Meta")
         
         df_criativos = df_meta.groupby(['criativo', 'tipo_criativo']).agg({
             'leads': 'sum',
@@ -637,19 +710,22 @@ if df is not None:
                 cpl = row['investimento'] / row['leads'] if row['leads'] > 0 else 0
                 cpmat = row['investimento'] / row['matriculas'] if row['matriculas'] > 0 else 0
                 ctr = (row['cliques'] / row['impressoes'] * 100) if row['impressoes'] > 0 else 0
+                cpm = (row['investimento'] / row['impressoes'] * 1000) if row['impressoes'] > 0 else 0
                 
-                col1, col2, col3, col4, col5, col6 = st.columns(6)
-                col1.metric(f"🎨 {row['criativo']}", f"{row['tipo_criativo']}")
-                col2.metric("Leads", f"{row['leads']:,.0f}")
-                col3.metric("Matrículas", f"{row['matriculas']:,.0f}")
-                col4.metric("CPL", f"R$ {cpl:.2f}")
-                col5.metric("CPMat", f"R$ {cpmat:.2f}")
-                col6.metric("CTR", f"{ctr:.1f}%")
+                with st.container():
+                    col1, col2, col3, col4, col5, col6 = st.columns(6)
+                    col1.metric(f"🎨 {row['criativo']}", f"{row['tipo_criativo']}")
+                    col2.metric("Leads", f"{row['leads']:,.0f}")
+                    col3.metric("Matrículas", f"{row['matriculas']:,.0f}")
+                    col4.metric("CPL", f"R$ {cpl:.2f}")
+                    col5.metric("CPMat", f"R$ {cpmat:.2f}")
+                    col6.metric("CTR", f"{ctr:.1f}%")
+                    st.markdown("---")
     
     # Termos de Pesquisa - Google
     df_google = df_filtrado[df_filtrado['plataforma'] == 'Google']
     if not df_google.empty:
-        st.subheader("Termos de Pesquisa - Google")
+        st.subheader("🔍 Termos de Pesquisa - Google")
         
         df_termos = df_google.groupby('termo_pesquisa').agg({
             'leads': 'sum',
@@ -659,11 +735,16 @@ if df is not None:
         
         df_termos = df_termos[df_termos['termo_pesquisa'] != '']
         if not df_termos.empty:
+            df_termos['cpl'] = df_termos['investimento'] / df_termos['leads']
+            df_termos['cpmat'] = df_termos['investimento'] / df_termos['matriculas']
+            
             st.dataframe(
                 df_termos.sort_values('leads', ascending=False).head(10).style.format({
                     'investimento': 'R$ {:,.0f}',
                     'leads': '{:,.0f}',
-                    'matriculas': '{:,.0f}'
+                    'matriculas': '{:,.0f}',
+                    'cpl': 'R$ {:.2f}',
+                    'cpmat': 'R$ {:.2f}'
                 }),
                 use_container_width=True
             )
@@ -698,104 +779,4 @@ if df is not None:
     
     with col2:
         # Performance por horário
-        df_horario = df_filtrado.groupby('horario').agg({
-            'leads': 'sum',
-            'matriculas': 'sum'
-        }).reset_index()
-        
-        fig_horario = px.bar(
-            df_horario, 
-            x='horario', 
-            y='leads',
-            title='Leads por Horário',
-            text_auto=True,
-            color='leads',
-            color_continuous_scale='Greens'
-        )
-        fig_horario.update_layout(height=300)
-        st.plotly_chart(fig_horario, use_container_width=True)
-    
-    # =====================
-    # 11. INSIGHTS E DOCUMENTAÇÃO
-    # =====================
-    
-    st.markdown("---")
-    st.header("💡 Insights e Documentação")
-    
-    with st.expander("📌 Principais Insights do Dashboard"):
-        st.markdown(f"""
-        **1. Eficiência de Conversão**
-        - Taxa de conversão Lead→Matrícula: **{metricas['taxa_lead_matricula']*100:.1f}%**
-        - Custo por matrícula (CPMat): **R$ {metricas['cpmat']:.2f}**
-        - Meta de matrículas: **{metricas['meta_matriculas']:,.0f}** vs Realizado: **{metricas['matriculas']:,.0f}**
-        
-        **2. Performance por Marca**
-        - Marca 1: Maior volume de leads, mas custo mais alto
-        - Marca 2: Menor volume, mas mais eficiente em conversão
-        - Ambas as marcas estão abaixo da meta em {100 - (metricas['matriculas']/metricas['meta_matriculas']*100):.1f}%
-        
-        **3. Sazonalidade**
-        - Picos de conversão em março e agosto
-        - Recomendação: Aumentar investimento em 15% nesses períodos
-        
-        **4. Otimização de Campanhas**
-        - Criativos "Fundo" têm conversão {max(0, (metricas['taxa_inscrito_matricula']*100 - 60)):.1f}% maior
-        - Melhor horário: Tarde/Noite
-        - Melhor dia: Terça/Quarta
-        
-        **5. Distribuição Regional**
-        - São Paulo e Rio de Janeiro concentram 50%+ dos leads
-        - Oportunidade em regiões com alta conversão e baixa penetração
-        """)
-    
-    with st.expander("📖 Documentação Técnica"):
-        st.markdown("""
-        ### Estrutura dos Dados
-        
-        **Granularidade:** Mensal
-        **Período:** Últimos 12 meses
-        **Dimensões:** Marca, Modalidade, Plataforma, Região, Curso
-        **Registros:** 384 (2 marcas × 2 modalidades × 2 plataformas × 12 meses)
-        
-        ### Métricas Calculadas
-        
-        - **CPL** = Investimento / Leads
-        - **CPI** = Investimento / Inscritos
-        - **CPMat** = Investimento / Matrículas
-        - **Taxa L→I** = Inscritos / Leads
-        - **Taxa I→M** = Matrículas / Inscritos
-        - **Taxa L→M** = Matrículas / Leads
-        - **Atingimento** = (Realizado / Meta) × 100
-        
-        ### Filtros Disponíveis
-        
-        - ✅ Período (Data Inicial e Final)
-        - ✅ Marca (Marca 1, Marca 2)
-        - ✅ Modalidade (Presencial, EAD)
-        
-        ### Premissas dos Dados Simulados
-        
-        1. Dados gerados com distribuição realista
-        2. Sazonalidade considerada (picos em março/agosto)
-        3. Correlações entre métricas mantidas
-        4. Metas calculadas com +10-20% sobre realizado
-        5. Matrículas < Inscritos < Leads (funil consistente)
-        6. CPMat > CPI > CPL (custos crescentes)
-        
-        ### Decisões de Design
-        
-        1. **Layout:** Seções organizadas com hierarquia clara
-        2. **Cores:** Paleta consistente para melhor interpretação
-        3. **Interatividade:** Filtros e gráficos dinâmicos
-        4. **Foco:** Métricas mais importantes em destaque
-        5. **Clareza:** Títulos descritivos e legendas informativas
-        """)
-    
-    # Footer
-    st.markdown("---")
-    st.markdown("**Dashboard desenvolvido para o Processo Seletivo - Agência de Tráfego Pago**")
-    st.markdown(f"*Dados atualizados até {datetime.now().strftime('%d/%m/%Y')}*")
-    st.markdown(f"*Total de registros carregados: {len(df):,}*")
-
-else:
-    st.warning("⚠️ Não foi possível carregar os dados. Verifique se o arquivo CSV foi gerado corretamente.")
+        df_horario = df
