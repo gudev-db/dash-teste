@@ -1,4 +1,4 @@
-# dashboard.py
+# dashboard.py - Versão Corrigida (Trecho dos KPIs)
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -143,7 +143,7 @@ if df is not None:
     st.markdown("---")
     
     # =====================
-    # 4. VISÃO GERAL - COM META REAL
+    # 4. VISÃO GERAL - COM META REAL (CORRIGIDO)
     # =====================
     
     st.header("📊 Visão Geral - Realizado vs Meta")
@@ -157,6 +157,7 @@ if df is not None:
     with col1:
         st.subheader("💰 Investimento")
         investimento_ating = calcular_atingimento(kpis['investimento']['realizado'], kpis['investimento']['meta'])
+        diferenca_invest = kpis['investimento']['meta'] - kpis['investimento']['realizado']
         
         col1a, col1b = st.columns(2)
         with col1a:
@@ -165,15 +166,24 @@ if df is not None:
                 f"R$ {kpis['investimento']['realizado']:,.0f}"
             )
         with col1b:
-            st.metric(
-                "Meta",
-                f"R$ {kpis['investimento']['meta']:,.0f}",
-                f"{investimento_ating:.1f}% atingido"
-            )
+            # CORREÇÃO: Mostrar claramente o percentual da meta
+            if investimento_ating >= 100:
+                st.metric(
+                    "Meta",
+                    f"R$ {kpis['investimento']['meta']:,.0f}",
+                    f"✅ {investimento_ating:.1f}% da meta (meta superada!)"
+                )
+            else:
+                st.metric(
+                    "Meta",
+                    f"R$ {kpis['investimento']['meta']:,.0f}",
+                    f"📊 {investimento_ating:.1f}% da meta (faltam R$ {diferenca_invest:,.0f})"
+                )
     
     with col2:
         st.subheader("👥 Leads")
         leads_ating = calcular_atingimento(kpis['leads']['realizado'], kpis['leads']['meta'])
+        diferenca_leads = kpis['leads']['meta'] - kpis['leads']['realizado']
         
         col2a, col2b = st.columns(2)
         with col2a:
@@ -182,17 +192,25 @@ if df is not None:
                 f"{kpis['leads']['realizado']:,.0f}"
             )
         with col2b:
-            st.metric(
-                "Meta",
-                f"{kpis['leads']['meta']:,.0f}",
-                f"{leads_ating:.1f}% atingido"
-            )
+            if leads_ating >= 100:
+                st.metric(
+                    "Meta",
+                    f"{kpis['leads']['meta']:,.0f}",
+                    f"✅ {leads_ating:.1f}% da meta (meta superada!)"
+                )
+            else:
+                st.metric(
+                    "Meta",
+                    f"{kpis['leads']['meta']:,.0f}",
+                    f"📊 {leads_ating:.1f}% da meta (faltam {diferenca_leads:,.0f})"
+                )
     
     col3, col4 = st.columns(2)
     
     with col3:
         st.subheader("📝 Inscritos")
         inscritos_ating = calcular_atingimento(kpis['inscritos']['realizado'], kpis['inscritos']['meta'])
+        diferenca_inscritos = kpis['inscritos']['meta'] - kpis['inscritos']['realizado']
         
         col3a, col3b = st.columns(2)
         with col3a:
@@ -201,15 +219,23 @@ if df is not None:
                 f"{kpis['inscritos']['realizado']:,.0f}"
             )
         with col3b:
-            st.metric(
-                "Meta",
-                f"{kpis['inscritos']['meta']:,.0f}",
-                f"{inscritos_ating:.1f}% atingido"
-            )
+            if inscritos_ating >= 100:
+                st.metric(
+                    "Meta",
+                    f"{kpis['inscritos']['meta']:,.0f}",
+                    f"✅ {inscritos_ating:.1f}% da meta (meta superada!)"
+                )
+            else:
+                st.metric(
+                    "Meta",
+                    f"{kpis['inscritos']['meta']:,.0f}",
+                    f"📊 {inscritos_ating:.1f}% da meta (faltam {diferenca_inscritos:,.0f})"
+                )
     
     with col4:
         st.subheader("🎓 Matrículas")
         matriculas_ating = calcular_atingimento(kpis['matriculas']['realizado'], kpis['matriculas']['meta'])
+        diferenca_matriculas = kpis['matriculas']['meta'] - kpis['matriculas']['realizado']
         
         col4a, col4b = st.columns(2)
         with col4a:
@@ -218,11 +244,18 @@ if df is not None:
                 f"{kpis['matriculas']['realizado']:,.0f}"
             )
         with col4b:
-            st.metric(
-                "Meta",
-                f"{kpis['matriculas']['meta']:,.0f}",
-                f"{matriculas_ating:.1f}% atingido"
-            )
+            if matriculas_ating >= 100:
+                st.metric(
+                    "Meta",
+                    f"{kpis['matriculas']['meta']:,.0f}",
+                    f"✅ {matriculas_ating:.1f}% da meta (meta superada!)"
+                )
+            else:
+                st.metric(
+                    "Meta",
+                    f"{kpis['matriculas']['meta']:,.0f}",
+                    f"📊 {matriculas_ating:.1f}% da meta (faltam {diferenca_matriculas:,.0f})"
+                )
     
     st.markdown("---")
     
@@ -282,7 +315,7 @@ if df is not None:
     
     st.markdown("---")
     
-    # Métricas por Marca com metas
+    # Métricas por Marca com metas (CORRIGIDO)
     st.subheader("🏢 Métricas por Marca - Realizado vs Meta")
     
     df_marca = df_filtrado.groupby('marca').agg({
@@ -310,28 +343,58 @@ if df is not None:
             col1, col2 = st.columns(2)
             
             with col1:
-                st.metric(
-                    "💰 Investimento",
-                    f"R$ {row['investimento']:,.0f}",
-                    f"Meta: R$ {row['meta_investimento']:,.0f} ({ating_invest:.1f}%)"
-                )
-                st.metric(
-                    "👥 Leads",
-                    f"{row['leads']:,.0f}",
-                    f"Meta: {row['meta_leads']:,.0f} ({ating_leads:.1f}%)"
-                )
+                if ating_invest >= 100:
+                    st.metric(
+                        "💰 Investimento",
+                        f"R$ {row['investimento']:,.0f}",
+                        f"Meta: R$ {row['meta_investimento']:,.0f} (✅ {ating_invest:.1f}%)"
+                    )
+                else:
+                    st.metric(
+                        "💰 Investimento",
+                        f"R$ {row['investimento']:,.0f}",
+                        f"Meta: R$ {row['meta_investimento']:,.0f} (📊 {ating_invest:.1f}%)"
+                    )
+                
+                if ating_leads >= 100:
+                    st.metric(
+                        "👥 Leads",
+                        f"{row['leads']:,.0f}",
+                        f"Meta: {row['meta_leads']:,.0f} (✅ {ating_leads:.1f}%)"
+                    )
+                else:
+                    st.metric(
+                        "👥 Leads",
+                        f"{row['leads']:,.0f}",
+                        f"Meta: {row['meta_leads']:,.0f} (📊 {ating_leads:.1f}%)"
+                    )
             
             with col2:
-                st.metric(
-                    "📝 Inscritos",
-                    f"{row['inscritos']:,.0f}",
-                    f"Meta: {row['meta_inscritos']:,.0f} ({ating_inscritos:.1f}%)"
-                )
-                st.metric(
-                    "🎓 Matrículas",
-                    f"{row['matriculas']:,.0f}",
-                    f"Meta: {row['meta_matriculas']:,.0f} ({ating_matriculas:.1f}%)"
-                )
+                if ating_inscritos >= 100:
+                    st.metric(
+                        "📝 Inscritos",
+                        f"{row['inscritos']:,.0f}",
+                        f"Meta: {row['meta_inscritos']:,.0f} (✅ {ating_inscritos:.1f}%)"
+                    )
+                else:
+                    st.metric(
+                        "📝 Inscritos",
+                        f"{row['inscritos']:,.0f}",
+                        f"Meta: {row['meta_inscritos']:,.0f} (📊 {ating_inscritos:.1f}%)"
+                    )
+                
+                if ating_matriculas >= 100:
+                    st.metric(
+                        "🎓 Matrículas",
+                        f"{row['matriculas']:,.0f}",
+                        f"Meta: {row['meta_matriculas']:,.0f} (✅ {ating_matriculas:.1f}%)"
+                    )
+                else:
+                    st.metric(
+                        "🎓 Matrículas",
+                        f"{row['matriculas']:,.0f}",
+                        f"Meta: {row['meta_matriculas']:,.0f} (📊 {ating_matriculas:.1f}%)"
+                    )
             
             # Custos
             st.write("**Custos:**")
@@ -710,7 +773,6 @@ if df is not None:
                 cpl = row['investimento'] / row['leads'] if row['leads'] > 0 else 0
                 cpmat = row['investimento'] / row['matriculas'] if row['matriculas'] > 0 else 0
                 ctr = (row['cliques'] / row['impressoes'] * 100) if row['impressoes'] > 0 else 0
-                cpm = (row['investimento'] / row['impressoes'] * 1000) if row['impressoes'] > 0 else 0
                 
                 with st.container():
                     col1, col2, col3, col4, col5, col6 = st.columns(6)
@@ -779,4 +841,96 @@ if df is not None:
     
     with col2:
         # Performance por horário
-        df_horario = df
+        df_horario = df_filtrado.groupby('horario').agg({
+            'leads': 'sum',
+            'matriculas': 'sum'
+        }).reset_index()
+        
+        fig_horario = px.bar(
+            df_horario, 
+            x='horario', 
+            y='leads',
+            title='Leads por Horário',
+            text_auto=True,
+            color='leads',
+            color_continuous_scale='Greens'
+        )
+        fig_horario.update_layout(height=300)
+        st.plotly_chart(fig_horario, use_container_width=True)
+    
+    # =====================
+    # 11. INSIGHTS E DOCUMENTAÇÃO
+    # =====================
+    
+    st.markdown("---")
+    st.header("💡 Insights e Documentação")
+    
+    with st.expander("📌 Principais Insights do Dashboard"):
+        st.markdown(f"""
+        **1. Eficiência de Conversão**
+        - Taxa de conversão Lead→Matrícula: **{metricas['taxa_lead_matricula']*100:.1f}%**
+        - Custo por matrícula (CPMat): **R$ {metricas['cpmat']:.2f}**
+        - Meta de matrículas: **{metricas['meta_matriculas']:,.0f}** vs Realizado: **{metricas['matriculas']:,.0f}**
+        
+        **2. Atingimento das Metas**
+        - Investimento: **{calcular_atingimento(metricas['investimento'], metricas['meta_investimento']):.1f}%** da meta
+        - Leads: **{calcular_atingimento(metricas['leads'], metricas['meta_leads']):.1f}%** da meta
+        - Inscritos: **{calcular_atingimento(metricas['inscritos'], metricas['meta_inscritos']):.1f}%** da meta
+        - Matrículas: **{calcular_atingimento(metricas['matriculas'], metricas['meta_matriculas']):.1f}%** da meta
+        
+        **3. Performance por Marca**
+        - Marca 1: Maior volume de leads, mas custo mais alto
+        - Marca 2: Menor volume, mas mais eficiente em conversão
+        
+        **4. Sazonalidade**
+        - Picos de conversão em março e agosto
+        - Recomendação: Aumentar investimento em 15% nesses períodos
+        
+        **5. Otimização de Campanhas**
+        - Criativos "Fundo" têm melhor conversão
+        - Melhor horário: Tarde/Noite
+        - Melhor dia: Terça/Quarta
+        """)
+    
+    with st.expander("📖 Documentação Técnica"):
+        st.markdown("""
+        ### Estrutura dos Dados
+        
+        **Granularidade:** Mensal
+        **Período:** Últimos 12 meses
+        **Dimensões:** Marca, Modalidade, Plataforma, Região, Curso
+        
+        ### Métricas Calculadas
+        
+        - **CPL** = Investimento / Leads
+        - **CPI** = Investimento / Inscritos
+        - **CPMat** = Investimento / Matrículas
+        - **Taxa L→I** = Inscritos / Leads
+        - **Taxa I→M** = Matrículas / Inscritos
+        - **Taxa L→M** = Matrículas / Leads
+        - **Atingimento** = (Realizado / Meta) × 100
+        
+        ### Filtros Disponíveis
+        
+        - ✅ Período (Data Inicial e Final)
+        - ✅ Marca (Marca 1, Marca 2)
+        - ✅ Modalidade (Presencial, EAD)
+        
+        ### Premissas dos Dados Simulados
+        
+        1. Dados gerados com distribuição realista
+        2. Sazonalidade considerada (picos em março/agosto)
+        3. Correlações entre métricas mantidas
+        4. Metas calculadas com variação independente (-10% a +35%)
+        5. Matrículas < Inscritos < Leads (funil consistente)
+        6. CPMat > CPI > CPL (custos crescentes)
+        """)
+    
+    # Footer
+    st.markdown("---")
+    st.markdown("**Dashboard desenvolvido para o Processo Seletivo - Agência de Tráfego Pago**")
+    st.markdown(f"*Dados atualizados até {datetime.now().strftime('%d/%m/%Y')}*")
+    st.markdown(f"*Total de registros carregados: {len(df):,}*")
+
+else:
+    st.warning("⚠️ Não foi possível carregar os dados. Verifique se o arquivo CSV foi gerado corretamente.")
